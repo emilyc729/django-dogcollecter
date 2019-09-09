@@ -1,14 +1,6 @@
 from django.shortcuts import render
 from .models import Dog
 
-"""
-dogs = [
-  Dog('Michi', 'shiba-inu', 'the cutest', 2),
-  Dog('Cookie', 'pug', 'shy newborn ', 0),
-  Dog('Mochi', 'corgi', 'stubby happy fluff ball', 3)
-]
-"""
-
 #create home view
 def home(request):
     return render(request, 'home.html')
