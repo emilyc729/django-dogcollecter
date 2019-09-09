@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from .models import Dog
 
 """
 dogs = [
@@ -19,4 +19,5 @@ def about(request):
 
 #create dogs list view
 def dogs_index(request):
+    dogs = Dog.objects.all()
     return render(request, 'dogs/index.html', {'dogs': dogs})
