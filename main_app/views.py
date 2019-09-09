@@ -21,3 +21,8 @@ def about(request):
 def dogs_index(request):
     dogs = Dog.objects.all()
     return render(request, 'dogs/index.html', {'dogs': dogs})
+
+#create dogs detail view
+def dogs_detail(request, dog_id):
+    dog = Dog.objects.get(id=dog_id)
+    return render(request, 'dogs/detail.html', {'dog': dog})
