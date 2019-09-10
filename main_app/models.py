@@ -24,6 +24,8 @@ class Dog(models.Model):
     breed = models.CharField(max_length=100)
     description = models.TextField(max_length=250)
     age = models.IntegerField()
+    #M:M relationship
+    toys = models.ManyToManyField(Toy)
 
     def __str__(self):
         return f'{self.name} {self.id}'
