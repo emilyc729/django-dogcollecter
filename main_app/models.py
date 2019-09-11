@@ -1,7 +1,8 @@
 from django.db import models
 from django.urls import reverse
 from datetime import date
-# Create your models here.
+# Import User
+from django.contrib.auth.models import User
 
 MEALS = (
     ('B', 'Breakfast'),
@@ -26,6 +27,8 @@ class Dog(models.Model):
     age = models.IntegerField()
     #M:M relationship
     toys = models.ManyToManyField(Toy)
+    #1:M user to cat relationship
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.name} {self.id}'

@@ -19,4 +19,5 @@ urlpatterns = [
     path('dogs/<int:dog_id>/assoc_toy/<int:toy_id>/', views.assoc_toy, name='assoc_toy'),
     # Diassociate toy w/ Dog
     path('dogs/<int:dog_id>/diassoc_toy/<int:toy_id>/', views.diassoc_toy, name='diassoc_toy'),
+    path('accounts/signup', views.signup, name='signup'),
 ]
