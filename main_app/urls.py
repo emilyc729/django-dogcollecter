@@ -20,4 +20,6 @@ urlpatterns = [
     # Diassociate toy w/ Dog
     path('dogs/<int:dog_id>/diassoc_toy/<int:toy_id>/', views.diassoc_toy, name='diassoc_toy'),
     path('accounts/signup', views.signup, name='signup'),
+    #add photo
+    path('dogs/<int:dog_id>/add_photo/', views.add_photo, name='add_photo'),
 ]

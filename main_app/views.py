@@ -1,19 +1,30 @@
 from django.shortcuts import render, redirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, DetailView
-from .models import Dog, Toy
+from .models import Dog, Toy, Photo
 from .forms import FeedingForm
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 # protect class based views
 from django.contrib.auth.mixins import LoginRequiredMixin
+# photos
+import uuid
+import boto3
+
+# Constants
+S3_BASE_URL = 'https://s3-us-west-1.amazonaws.com/'
+BUCKET = 'dogcollector-ec'
 
 # create home view
+
+
 def home(request):
     return render(request, 'home.html')
 
 # create about view
+
+
 def about(request):
     return render(request, 'about.html')
 
@@ -27,7 +38,8 @@ def dogs_index(request):
 @login_required
 def dogs_detail(request, dog_id):
     dog = Dog.objects.get(id=dog_id)
-    toys_dog_doesnt_have = Toy.objects.exclude(id__in = dog.toys.all().values_list('id'))
+    toys_dog_doesnt_have = Toy.objects.exclude(
+        id__in=dog.toys.all().values_list('id'))
     feeding_form = FeedingForm()
     return render(request, 'dogs/detail.html', {
         'dog': dog,
@@ -36,24 +48,30 @@ def dogs_detail(request, dog_id):
     })
 
 # class for CBV:create
+
+
 class DogCreate(LoginRequiredMixin, CreateView):
     model = Dog
     fields = '__all__'
     success_url = '/dogs/'
 
-    #associate cat w/ user when valid cat form
+    # associate cat w/ user when valid cat form
     def form_valid(self, form):
-        #assign to logged in user
+        # assign to logged in user
         form.instance.user = self.request.user
         # create model in database
         return super().form_valid(form)
 
 # class for CBV:update
+
+
 class DogUpdate(LoginRequiredMixin, UpdateView):
     model = Dog
     fields = ['breed', 'description']
 
 # class for CBV:delete
+
+
 class DogDelete(LoginRequiredMixin, DeleteView):
     model = Dog
     success_url = '/dogs/'
@@ -68,11 +86,14 @@ def add_feeding(request, dog_id):
         new_feeding.save()
     return redirect('detail', dog_id=dog_id)
 
+
 class ToyList(LoginRequiredMixin, ListView):
     model = Toy
 
+
 class ToyDetail(LoginRequiredMixin, DetailView):
     model = Toy
+
 
 class ToyCreate(LoginRequiredMixin, CreateView):
     model = Toy
@@ -82,23 +103,28 @@ class ToyCreate(LoginRequiredMixin, CreateView):
         print(form)
         return super().form_valid(form)
 
+
 class ToyUpdate(LoginRequiredMixin, UpdateView):
     model = Toy
     fields = ['name', 'color']
 
+
 class ToyDelete(LoginRequiredMixin, DeleteView):
     model = Toy
     success_url = '/toys/'
+
 
 @login_required
 def assoc_toy(request, dog_id, toy_id):
     Dog.objects.get(id=dog_id).toys.add(toy_id)
     return redirect('detail', dog_id=dog_id)
 
+
 @login_required
 def diassoc_toy(request, dog_id, toy_id):
     Dog.objects.get(id=dog_id).toys.remove(toy_id)
     return redirect('detail', dog_id=dog_id)
+
 
 def signup(request):
     error_message = ''
@@ -123,3 +149,21 @@ def signup(request):
         'error_message': error_message
     }
     return render(request, 'registration/signup.html', context)
+
+
+def add_photo(request, dog_id):
+    photo_file = request.FILES.get('photo-file', None)
+    # make sure a file is uploaded
+    if photo_file:
+        s3 = boto3.client('s3')
+        print(s3)
+        # random # + file extension(.jpg, .png)
+        key = uuid.uuid4().hex[:6] + photo_file.name[photo_file.name.rfind('.'):]
+        try:
+            s3.upload_fileobj(photo_file, BUCKET, key)
+            url = f'{S3_BASE_URL}{BUCKET}/{key}'
+            photo = Photo(url=url, dog_id=dog_id)
+            photo.save()
+        except:
+            print('An error occurred uploading file to s3')
+    return redirect('detail', dog_id=dog_id)
