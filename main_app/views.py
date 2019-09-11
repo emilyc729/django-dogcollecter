@@ -98,9 +98,12 @@ class ToyDetail(LoginRequiredMixin, DetailView):
 class ToyCreate(LoginRequiredMixin, CreateView):
     model = Toy
     fields = '__all__'
-
+    
     def form_valid(self, form):
-        print(form)
+        quantity = int(self.request.POST.get('quantity'))
+        toy_name = self.request.POST.get('name')
+        toy_color = self.request.POST.get('color')
+        Toy.objects.bulk_create([Toy(name=toy_name, color=toy_color) for i in range(1, quantity)])
         return super().form_valid(form)
 
 
