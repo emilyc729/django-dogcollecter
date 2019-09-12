@@ -20,10 +20,10 @@ BUCKET = 'dogcollector-ec'
 
 
 def home(request):
-    return render(request, 'home.html')
+    all_dogs = Dog.objects.all()
+    return render(request, 'home.html', {'dogs': all_dogs})
 
 # create about view
-
 
 def about(request):
     return render(request, 'about.html')
@@ -52,7 +52,7 @@ def dogs_detail(request, dog_id):
 
 class DogCreate(LoginRequiredMixin, CreateView):
     model = Dog
-    fields = '__all__'
+    fields = ['name', 'breed', 'description', 'age']
     success_url = '/dogs/'
 
     # associate cat w/ user when valid cat form
@@ -69,7 +69,7 @@ class DogUpdate(LoginRequiredMixin, UpdateView):
     model = Dog
     fields = ['breed', 'description']
 
-# class for CBV:delete
+# class for CBV:delete 
 
 
 class DogDelete(LoginRequiredMixin, DeleteView):
@@ -159,7 +159,6 @@ def add_photo(request, dog_id):
     # make sure a file is uploaded
     if photo_file:
         s3 = boto3.client('s3')
-        print(s3)
         # random # + file extension(.jpg, .png)
         key = uuid.uuid4().hex[:6] + photo_file.name[photo_file.name.rfind('.'):]
         try:
